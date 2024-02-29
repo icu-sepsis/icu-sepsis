@@ -1,0 +1,9 @@
+{
+    "n_states": 750,
+    "n_actions": 25,
+    "r_survive": 1.0,
+    "r_death": 0.0,
+    "threshold": 20,
+    "seed": 0,
+    "action_map_method": "uniform_unweighted"
+}

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "icu-sepsis-helpers"
+version = "0.1.0"
+dependencies = [
+  "gymnasium>=0.28.1",
+  "gym>=0.21.0",
+  "tqdm>=4.65.0",
+  "icu-sepsis>=0.1.0"
+]
+requires-python = ">=3.10"
+authors = [
+  {name = "Anonymized"}
+]
+maintainers = [
+  {name = "Anonymized"}
+]
+description = "Helper package to build the ICU-Sepsis environment from raw data."
+readme = "README.rst"
+license = {file = "LICENSE.txt"}
+keywords = ["sepsis", "icu", "reinforcement-learning"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python"
+]
