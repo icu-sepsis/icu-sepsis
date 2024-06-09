@@ -2,12 +2,27 @@
 
 The **ICU-Sepsis** environment is a reinforcement learning environment that
 simulates the treatment of sepsis in an intensive care unit (ICU). The
-environment is built using the
-[MIMIC-III Dataset](https://physionet.org/content/mimiciii/1.4/),
+environment is introduced in the paper
+*ICU-Sepsis: A Benchmark MDP Built from Real Medical Data*, accepted at the 
+Reinforcement Learning Conference, 2024. ICU-Sepsis is built using 
+the [MIMIC-III Dataset](https://physionet.org/content/mimiciii/1.4/),
 based on the work of
 [Komorowski et al. (2018)](https://www.nature.com/articles/s41591-018-0213-5).
 
-## Environement description
+![ICU-Sepsis Environment](assets/sepsis-fig-timeline.png)
+
+Citation:
+```bibtex
+@inproceedings{
+choudhary2024icusepsis,
+title={{ICU-Sepsis}: A Benchmark {MDP} Built from Real Medical Data},
+author={Kartik Choudhary and Dhawal Gupta and Philip S. Thomas},
+booktitle={Reinforcement Learning Conference},
+year={2024},
+}
+```
+
+## Environment description
 
 ICU-Sepsis is a tabular MDP with $N_S = 716$ states ($\\{0,1,\dots,715\\}$) and $N_A = 25$ actions ($\\{0,1,\dots,24\\}$).
 Each episode simulates the treatment of one sepsis patient in the ICU.
@@ -62,18 +77,30 @@ in the `icu-sepsis-csv-tables.tar.gz` archive which contains the following files
 
 ## Python installation and quickstart
 
-The requirements for the environment are listed in the `requirements.txt` file, and can be installed using the `pip` command:
+ICU-Sepsis can be used with Python `3.10` or later, with gymnasium `0.28.1` or
+later, and gym `0.21.0` or later.
+
+
+### Installation with pip
+
+The environment can be installed using the `pip` command:
 
 ```bash
-pip install -r requirements.txt
+pip install icu-sepsis
 ```
 
-The environment can be installed locally by opening the `packages` directory in the terminal and using the `pip` command:
+### Installation from source
+
+To install the environment from source, clone the repository and navigate to
+the `packages` directory, and install the `icu_sepsis` package locally:
 
 ```bash
-cd packages/
-pip install -e icu_sepsis/
+git clone https://github.com/icu-sepsis/icu-sepsis.git
+cd icu-sepsis/packages/
+pip install icu_sepsis/
 ```
+
+### Uninstallation
 
 To uninstall, use the `pip uninstall` command:
 
@@ -81,8 +108,11 @@ To uninstall, use the `pip uninstall` command:
 pip uninstall icu_sepsis -y
 ```
 
+### Quickstart
+
 The environment can be loaded with the Gym or Gymnasium packages and follows
-the standard Gym API.
+the standard Gym API. The following code snippet demonstrates how to create
+the environment, reset it, and take a step:
 
 ```python
 import gymnasium as gym
@@ -100,14 +130,18 @@ print('Terminated:', terminated)
 print('Truncated:', truncated)
 ```
 
-## Optional Helper Library
+You can run the script `examples/quickstart.py` to verify that the
+installation was successful.
 
-The optional helper library can be installed locally by opening the `packages`
-directory in the terminal and using the `pip` command:
+## Reproducing the environment parameters
+
+The optional helper library can be installed locally by cloning the repository,
+and installing the `icu_sepsis_helpers` package in the `packages` directory:
 
 ```bash
-cd packages/
-pip install -e icu_sepsis_helpers/
+git clone https://github.com/icu-sepsis/icu-sepsis.git
+cd icu-sepsis/packages/
+pip install icu_sepsis_helpers/
 ```
 
 This library provides a set of helper functions to re-create the environment
@@ -126,3 +160,5 @@ create the environment parameters using the created sepsis cohort.
 
 For convenience, the `examples/build_mimic_demo.py` script can be used to
 create the environment parameters and save them to disk.
+
+Baselines can be computed using the `examples/get_baselines.py` script.

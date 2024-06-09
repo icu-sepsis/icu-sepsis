@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "icu-sepsis"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
   "gymnasium>=0.28.1",
   "gym>=0.21.0",
@@ -17,13 +17,15 @@ dependencies = [
 ]
 requires-python = ">=3.10"
 authors = [
-  {name = "Anonymized"}
+  {name = "Kartik Choudhary"},
+  {name = "Dhawal Gupta"},
+  {name = "Philip S. Thomas"},
 ]
 maintainers = [
-  {name = "Anonymized"},
+  {name = "Kartik Choudhary", email = "kartikchoudh@cs.umass.edu"},
 ]
 description = "Python implementation of the ICU-Sepsis environment."
-readme = "README.rst"
+readme = "README.md"
 license = {file = "LICENSE.txt"}
 keywords = ["sepsis", "icu", "reinforcement-learning"]
 classifiers = [

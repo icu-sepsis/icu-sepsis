@@ -1,1 +1,0 @@
-The Python package for the ICU-Sepsis RL environment.
