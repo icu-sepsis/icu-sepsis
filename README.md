@@ -14,11 +14,12 @@ based on the work of
 Citation:
 ```bibtex
 @inproceedings{
-choudhary2024icusepsis,
-title={{ICU-Sepsis}: A Benchmark {MDP} Built from Real Medical Data},
-author={Kartik Choudhary and Dhawal Gupta and Philip S. Thomas},
-booktitle={Reinforcement Learning Conference},
-year={2024},
+  choudhary2024icusepsis,
+  title={{ICU-Sepsis}: A Benchmark {MDP} Built from Real Medical Data},
+  author={Kartik Choudhary and Dhawal Gupta and Philip S. Thomas},
+  booktitle={Reinforcement Learning Conference},
+  year={2024},
+  url={https://arxiv.org/abs/2406.05646}
 }
 ```
 
