@@ -3,7 +3,7 @@
 The **ICU-Sepsis** environment is a reinforcement learning environment that
 simulates the treatment of sepsis in an intensive care unit (ICU). The
 environment is introduced in the paper
-*ICU-Sepsis: A Benchmark MDP Built from Real Medical Data*, accepted at the 
+[ICU-Sepsis: A Benchmark MDP Built from Real Medical Data](https://arxiv.org/abs/2406.05646), accepted at the 
 Reinforcement Learning Conference, 2024. ICU-Sepsis is built using 
 the [MIMIC-III Dataset](https://physionet.org/content/mimiciii/1.4/),
 based on the work of
