@@ -41,6 +41,16 @@ The three baseline policies used are:
 2. **Expert:** The estimated policy used by clinicians in the real world, computed using the data from the MIMIC-III dataset.
 3. **Optimal:** Optimal policy computed using value iteration (requires knowledge of the transition parameters)
 
+## Admissible actions
+
+In the MIMIC-III dataset, not all actions are taken enough times in each state
+to reliably estimate the transition probabilities, and such actions are
+considered inadmissible. To deal with this issue, the transition probabilities
+for inadmissible actions are set to the mean of the transition probabilities of
+all admissible actions in the state. This way, the environment can be used with
+all actions in all states. This is an implementation detail and does not need to
+be considered for normal use. See the paper for more details.
+
 ## Installation
 
 ICU-Sepsis can be used with Python `3.10` or later, with gymnasium `0.28.1` or
@@ -69,14 +79,42 @@ the environment, reset it, and take a step:
 import gymnasium as gym
 import icu_sepsis
 
-env = gym.make('Sepsis/ICU-Sepsis-v1')
+env = gym.make('Sepsis/ICU-Sepsis-v2')
 
 state, info = env.reset()
 print('Initial state:', state)
+print('Extra info:', info)
 
 next_state, reward, terminated, truncated, info = env.step(0)
+print('\nTaking action 0:')
 print('Next state:', next_state)
 print('Reward:', reward)
 print('Terminated:', terminated)
 print('Truncated:', truncated)
 ```
+
+You can also run the script `examples/quickstart.py` to verify that the
+installation was successful.
+
+### Version 2 changes
+
+As mentioned previously, not all actions are admissible in all states, so the
+transition probabilities for inadmissible actions are set to the mean of the
+transition probabilities of all admissible actions in the state. This was the
+only mode of operation in version 1, and all the baseline numbers are based on
+this mode.
+
+In version 2, this mode remains the default, so creating the environment with
+`gym.make('Sepsis/ICU-Sepsis-v2')` without providing any additional arguments
+is equivalent to the version 1 behavior.
+
+However, in version 2, the environment creation can take an optional argument
+`inadmissible_action_strategy` which can be set to the following values:
+
+1. `'mean'` (default): The transition probabilities for inadmissible actions
+   are set to the mean of the transition probabilities of all admissible actions
+   in the state.
+2. `'terminate'`: The environment terminates the episode if an inadmissible
+   action is taken in any state, and the patient is sent to the "death" state.
+3. `'raise_exception'`: The environment raises an exception if an inadmissible
+   action is taken in any state.
