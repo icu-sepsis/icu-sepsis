@@ -3,9 +3,9 @@
 The **ICU-Sepsis** environment is a reinforcement learning environment that
 simulates the treatment of sepsis in an intensive care unit (ICU). The
 environment is introduced in the paper
-[ICU-Sepsis: A Benchmark MDP Built from Real Medical Data](https://arxiv.org/abs/2406.05646), accepted at the 
-Reinforcement Learning Conference, 2024. ICU-Sepsis is built using 
-the [MIMIC-III Dataset](https://physionet.org/content/mimiciii/1.4/),
+[ICU-Sepsis: A Benchmark MDP Built from Real Medical Data](https://arxiv.org/abs/2406.05646),
+accepted at the Reinforcement Learning Conference, 2024. ICU-Sepsis is built
+using the [MIMIC-III Dataset](https://physionet.org/content/mimiciii/1.4/),
 based on the work of
 [Komorowski et al. (2018)](https://www.nature.com/articles/s41591-018-0213-5).
 
@@ -61,6 +61,16 @@ The three baseline policies used are:
 2. **Expert:** The estimated policy used by clinicians in the real world, computed using the data from the MIMIC-III dataset.
 3. **Optimal:** Optimal policy computed using value iteration (requires knowledge of the transition parameters).
 
+## Admissible actions
+
+In the MIMIC-III dataset, not all actions are taken enough times in each state
+to reliably estimate the transition probabilities, and such actions are
+considered inadmissible. To deal with this issue, the transition probabilities
+for inadmissible actions are set to the mean of the transition probabilities of
+all admissible actions in the state. This way, the environment can be used with
+all actions in all states. This is an implementation detail and does not need to
+be considered for normal use. See the paper for more details.
+
 ## Model parameters
 
 In addition to the Python implementation of the environment using the [Gym](https://www.gymlibrary.dev/) and
@@ -75,6 +85,13 @@ in the `icu-sepsis-csv-tables.tar.gz` archive which contains the following files
    of the state $s$ is present in the $s^{\text{th}}$ column.
 4. `expertPolicy.csv`: The expert policy table with $N_S$ rows and $N_A$ columns containing the estimated policy $\pi_{\text{expert}}$ used
    by the clinicians. The probability $\pi_{\text{expert}}(s, a)$ is present in the $a^{\text{th}}$ column of the $s^{\text{th}}$ row.
+
+The following extra files are not required for the environment but are provided for reference in the `extras/` directory:
+1. `admissibleActions.txt`: The list of admissible actions for each state. The first line contains the space-separated list
+   of number of admissible actions for each state, and the subsequent lines contain the space-separated list of admissible actions
+   for each state.
+2. `stateClusterCenters.csv`: The cluster centers of the states in the normalized continuous feature space.
+3. `sofaScores.csv`: The average [SOFA scores](https://files.asprtracie.hhs.gov/documents/aspr-tracie-sofa-score-fact-sheet.pdf) for each state based on the MIMIC-III dataset.
 
 ## Python installation and quickstart
 
@@ -101,7 +118,7 @@ cd icu-sepsis/packages/
 pip install icu_sepsis/
 ```
 
-### Uninstallation
+### Uninstalling
 
 To uninstall, use the `pip uninstall` command:
 
@@ -119,20 +136,45 @@ the environment, reset it, and take a step:
 import gymnasium as gym
 import icu_sepsis
 
-env = gym.make('Sepsis/ICU-Sepsis-v1')
+env = gym.make('Sepsis/ICU-Sepsis-v2')
 
 state, info = env.reset()
 print('Initial state:', state)
+print('Extra info:', info)
 
 next_state, reward, terminated, truncated, info = env.step(0)
+print('\nTaking action 0:')
 print('Next state:', next_state)
 print('Reward:', reward)
 print('Terminated:', terminated)
 print('Truncated:', truncated)
 ```
 
-You can run the script `examples/quickstart.py` to verify that the
+You can also run the script `examples/quickstart.py` to verify that the
 installation was successful.
+
+### Version 2 changes
+
+As mentioned previously, not all actions are admissible in all states, so the
+transition probabilities for inadmissible actions are set to the mean of the
+transition probabilities of all admissible actions in the state. This was the
+only mode of operation in version 1, and all the baseline numbers are based on
+this mode.
+
+In version 2, this mode remains the default, so creating the environment with
+`gym.make('Sepsis/ICU-Sepsis-v2')` without providing any additional arguments
+is equivalent to the version 1 behavior.
+
+However, in version 2, the environment creation can take an optional argument
+`inadmissible_action_strategy` which can be set to the following values:
+
+1. `'mean'` (default): The transition probabilities for inadmissible actions
+   are set to the mean of the transition probabilities of all admissible actions
+   in the state.
+2. `'terminate'`: The environment terminates the episode if an inadmissible
+   action is taken in any state, and the patient is sent to the "death" state.
+3. `'raise_exception'`: The environment raises an exception if an inadmissible
+   action is taken in any state.
 
 ## Reproducing the environment parameters
 
@@ -163,3 +205,4 @@ For convenience, the `examples/build_mimic_demo.py` script can be used to
 create the environment parameters and save them to disk.
 
 Baselines can be computed using the `examples/get_baselines.py` script.
+

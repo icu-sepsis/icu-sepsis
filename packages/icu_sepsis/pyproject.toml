@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "icu-sepsis"
-version = "1.0.0"
+version = "2.0.0"
 dependencies = [
   "gymnasium>=0.28.1",
   "gym>=0.21.0",
