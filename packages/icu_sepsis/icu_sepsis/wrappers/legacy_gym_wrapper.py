@@ -1,3 +1,5 @@
+"""Wrapper for the legacy gym environment."""
+
 import gym
 import gymnasium
 import numpy as np
@@ -6,6 +8,7 @@ from gymnasium import spaces as gymn_spaces
 
 
 class GymWrapper(gym.Env):
+    """Wrapper for the legacy gym environment."""
 
     def __init__(self, env: gymnasium.Env, **kwargs):
         self._env = env

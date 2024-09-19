@@ -13,7 +13,7 @@ def rl_table_to_unnormalized_matrices(
     # tx_mat
     tx_mat = np.zeros((n_states+2, n_action_levels**2, n_states+2))
     d_0 = np.zeros((n_states+2,))
-    data_policy = np.zeros((n_states+2, n_action_levels**2))
+    expert_policy = np.zeros((n_states+2, n_action_levels**2))
     r_mat = np.zeros_like(tx_mat)
 
     row = rl_table.iloc[0, :]
@@ -21,7 +21,7 @@ def rl_table_to_unnormalized_matrices(
         row_next = rl_table.iloc[i, :]
         b, s, a = row['bloc'], row['state'], row['action']
         s_, b_ = row_next['state'], row_next['bloc']
-        data_policy[s, a] += 1
+        expert_policy[s, a] += 1
 
         # start of episode
         if b == 1:
@@ -46,7 +46,7 @@ def rl_table_to_unnormalized_matrices(
     r_mat[:, :, n_states] = r_death
     r_mat[:, :, n_states+1] = r_survive
 
-    return tx_mat, r_mat, d_0, data_policy
+    return tx_mat, r_mat, d_0, expert_policy
 
 
 def normalize_tx_mat(
@@ -73,11 +73,11 @@ def normalize_d_0(
     return d_0 / d_0.sum()
 
 
-def normalize_data_policy(
-        data_policy: np.ndarray,
+def normalize_expert_policy(
+        expert_policy: np.ndarray,
         ) -> np.ndarray:
     return np.divide(
-        data_policy,
-        np.sum(data_policy, axis=1, keepdims=True),
-        out=np.zeros_like(data_policy),
-        where=np.sum(data_policy, axis=1, keepdims=True) > 0)
+        expert_policy,
+        np.sum(expert_policy, axis=1, keepdims=True),
+        out=np.zeros_like(expert_policy),
+        where=np.sum(expert_policy, axis=1, keepdims=True) > 0)

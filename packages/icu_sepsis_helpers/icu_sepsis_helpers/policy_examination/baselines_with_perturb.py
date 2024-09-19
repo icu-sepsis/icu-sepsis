@@ -13,13 +13,13 @@ from matplotlib import pyplot as plt
 def run_trial(params_path, sigma):
     params = MDPParameters(params_path)
     tx_mat = params.tx_mat
-    allowed_actions = params.allowed_actions
+    admissible_actions = params.admissible_actions
 
-    tx_mat_perturbed, allowed_actions_perturbed = perturb(
-        tx_mat, allowed_actions, sigma)
+    tx_mat_perturbed, admissible_actions_perturbed = perturb(
+        tx_mat, admissible_actions, sigma)
 
     params._tx_mat = tx_mat_perturbed
-    params._allowed_actions = allowed_actions_perturbed
+    params._admissible_actions = admissible_actions_perturbed
 
     env_perturbed = gym.make('Sepsis/ICU-Sepsis-v1', params=params)
 
@@ -39,7 +39,7 @@ def get_results(param_dirname, sigma_vals, n_trials):
                 'j_mean': [], 'ep_len': []},
             'rand_policy': {
                 'j_mean': [], 'ep_len': []},
-            'data_policy': {
+            'expert_policy': {
                 'j_mean': [], 'ep_len': []}}
 
         with Pool(16) as pool:
@@ -55,10 +55,10 @@ def get_results(param_dirname, sigma_vals, n_trials):
                     result['rand_policy']['j_mean'])
                 results['rand_policy']['ep_len'].append(
                     result['rand_policy']['ep_len'])
-                results['data_policy']['j_mean'].append(
-                    result['data_policy']['j_mean'])
-                results['data_policy']['ep_len'].append(
-                    result['data_policy']['ep_len'])
+                results['expert_policy']['j_mean'].append(
+                    result['expert_policy']['j_mean'])
+                results['expert_policy']['ep_len'].append(
+                    result['expert_policy']['ep_len'])
 
         with open(
             f'perturbed_results_{param_dirname}_sigma_{sigma}.json', 'w'
@@ -74,7 +74,7 @@ def aggregate_results(param_dirname, sigma_vals):
         'rand_policy': {
             'rewards': {'mean': [], 'std': []},
             'ep_len': {'mean': [], 'std': []}},
-        'data_policy': {
+        'expert_policy': {
             'rewards': {'mean': [], 'std': []},
             'ep_len': {'mean': [], 'std': []}}}
 

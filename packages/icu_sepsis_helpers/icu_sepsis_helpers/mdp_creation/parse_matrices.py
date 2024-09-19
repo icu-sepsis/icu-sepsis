@@ -7,7 +7,7 @@ def create_valid_dynamics(
         tx_mat: np.ndarray,
         r_mat: np.ndarray,
         d_0: np.ndarray,
-        data_policy: np.ndarray,
+        expert_policy: np.ndarray,
         cluster_centers: np.ndarray,
         sofa_scores: np.ndarray, /) -> tuple[np.ndarray, ...]:
 
@@ -19,8 +19,8 @@ def create_valid_dynamics(
          'Expected {(N_s, N_a, N_s)}')
     assert d_0.shape == (N_s,), \
         f'Invalid initial state distribution shape: {d_0.shape}'
-    assert data_policy.shape == (N_s, N_a), \
-        f'Invalid data policy shape: {data_policy.shape}'
+    assert expert_policy.shape == (N_s, N_a), \
+        f'Invalid data policy shape: {expert_policy.shape}'
     assert cluster_centers.shape[0] == N_s-2, \
         f'Invalid cluster centers shape: {cluster_centers.shape}'
     assert sofa_scores.shape[0] == N_s-2, \
@@ -57,11 +57,11 @@ def create_valid_dynamics(
     d_0 = d_0_new
     logging.debug('Added `s_inf` to `d_0`. New shape: %s', d_0.shape)
 
-    data_policy_new = np.zeros((N_s+1, N_a))
-    data_policy_new[:N_s, :] = data_policy
-    data_policy = data_policy_new
-    logging.debug('Added `s_inf` to `data_policy`. '
-                  'New shape: %s', data_policy.shape)
+    expert_policy_new = np.zeros((N_s+1, N_a))
+    expert_policy_new[:N_s, :] = expert_policy
+    expert_policy = expert_policy_new
+    logging.debug('Added `s_inf` to `expert_policy`. '
+                  'New shape: %s', expert_policy.shape)
 
     # compute list of dead states
     dead_condition = np.isclose(tx_mat.sum(axis=(1,2)), 0.)
@@ -103,9 +103,9 @@ def create_valid_dynamics(
     logging.debug('Removed dead states from `d_0`. New shape: %s',
                   d_0.shape)
 
-    data_policy = data_policy[alive_states_list, :]
-    logging.debug('Removed dead states from `data_policy`. New shape: %s',
-                  data_policy.shape)
+    expert_policy = expert_policy[alive_states_list, :]
+    logging.debug('Removed dead states from `expert_policy`. New shape: %s',
+                  expert_policy.shape)
 
     cluster_centers = cluster_centers_new[alive_states_list, :]
     logging.debug('Removed dead states from `cluster_centers`. New shape: %s',
@@ -118,7 +118,7 @@ def create_valid_dynamics(
     logging.debug('Dead states removed: %s', dead_states_list)
 
     # check that the matrices are valid 
-    # (TODO: stochastic tx_mat check, data_policy check)
+    # (TODO: stochastic tx_mat check, expert_policy check)
     assert np.isclose(d_0.sum(), 1.), \
         'Initial state distribution is not stochastic.'
     assert tx_mat.shape[0] == tx_mat.shape[2], \
@@ -128,14 +128,14 @@ def create_valid_dynamics(
     assert tx_mat.shape[0] == d_0.shape[0], \
         ('Transition matrix and initial state distribution have '
          'different shapes.')
-    assert tx_mat.shape[:2] == data_policy.shape, \
+    assert tx_mat.shape[:2] == expert_policy.shape, \
         'Transition matrix and data policy have different shapes.'
     assert tx_mat.shape[0] == cluster_centers.shape[0], \
         'Transition matrix and cluster centers have different shapes.'
     assert tx_mat.shape[0] == sofa_scores.shape[0], \
         'Transition matrix and sofa scores have different shapes.'
 
-    return tx_mat, r_mat, d_0, data_policy, cluster_centers, sofa_scores
+    return tx_mat, r_mat, d_0, expert_policy, cluster_centers, sofa_scores
 
 
 def get_num_steps(t:tuple[int, int]) -> tuple[int, int]:
@@ -221,7 +221,7 @@ def create_action_map(tx_mat):
     return action_map
 
 
-def map_disallowed_actions(
+def map_inadmissible_actions(
         tx_mat_sparse: np.ndarray, /, *,
         method: str = 'uniform_unweighted', **kwargs) -> np.ndarray:
     if method == 'single':
@@ -240,8 +240,8 @@ def map_disallowed_actions(
         return tx_mat_full
     elif method == 'uniform_unweighted':
         s_s_sum = tx_mat_sparse.sum(axis=1)
-        n_acts_allowed = tx_mat_sparse.sum(axis=(1,2))
-        probs_unwtd = (s_s_sum / n_acts_allowed[:, np.newaxis]
+        n_acts_admissible = tx_mat_sparse.sum(axis=(1,2))
+        probs_unwtd = (s_s_sum / n_acts_admissible[:, np.newaxis]
                        )[:, np.newaxis, :]
         s_a_mask = np.isclose(tx_mat_sparse.sum(axis=2), 0.
                               ).astype(int)[..., np.newaxis]
@@ -253,10 +253,10 @@ def map_disallowed_actions(
         raise ValueError(f'Invalid method: `{method}`')
 
 
-def get_allowed_actions(tx_mat_sparse: np.ndarray) -> list[list[int]]:
+def get_admissible_actions(tx_mat_sparse: np.ndarray) -> list[list[int]]:
     sa_sum = tx_mat_sparse.sum(axis=(2))
     x, y = np.where(np.isclose(sa_sum, 1.))
-    allowed_actions = [[] for _ in range(tx_mat_sparse.shape[0])]
+    admissible_actions = [[] for _ in range(tx_mat_sparse.shape[0])]
     for s, a in zip(x, y):
-        allowed_actions[s].append(a)
-    return allowed_actions
+        admissible_actions[s].append(a)
+    return admissible_actions

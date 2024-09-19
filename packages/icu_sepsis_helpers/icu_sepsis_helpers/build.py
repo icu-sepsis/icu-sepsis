@@ -4,11 +4,11 @@ import tempfile
 
 import pandas as pd
 from icu_sepsis_helpers.mdp_creation.create_matrices import (
-    normalize_d_0, normalize_data_policy, normalize_tx_mat,
+    normalize_d_0, normalize_expert_policy, normalize_tx_mat,
     rl_table_to_unnormalized_matrices)
 from icu_sepsis_helpers.mdp_creation.create_rl_table import create_rl_dataset
 from icu_sepsis_helpers.mdp_creation.parse_matrices import (
-    create_valid_dynamics, get_allowed_actions, map_disallowed_actions)
+    create_valid_dynamics, get_admissible_actions, map_inadmissible_actions)
 from icu_sepsis.utils.io import MDPParameters
 
 
@@ -51,7 +51,7 @@ def build_mimic_params(
 
         # Create the unnormalized matrices
         (
-            tx_mat_u, r_mat, d_0_u, data_policy_u
+            tx_mat_u, r_mat, d_0_u, expert_policy_u
         ) = rl_table_to_unnormalized_matrices(mimic_rl_table, n_states, 
                                               n_action_levels,
                                               r_survive=r_survive,
@@ -60,7 +60,7 @@ def build_mimic_params(
 
         # Normalize the matrices
         d_0 = normalize_d_0(d_0_u)
-        data_policy = normalize_data_policy(data_policy_u)
+        expert_policy = normalize_expert_policy(expert_policy_u)
         tx_mat_sparse = normalize_tx_mat(tx_mat_u, threshold)
         logging.info('Normalized matrices')
 
@@ -72,25 +72,25 @@ def build_mimic_params(
             temp_dir.joinpath('mimic_sofa.csv'))
 
     (
-        tx_mat_sparse, r_mat, d_0, data_policy,
+        tx_mat_sparse, r_mat, d_0, expert_policy,
         cluster_centers, sofa_scores
     ) = create_valid_dynamics(
-        tx_mat_sparse, r_mat, d_0, data_policy,
+        tx_mat_sparse, r_mat, d_0, expert_policy,
         cluster_centers_u, sofa_scores_u)
     logging.info('Created valid dynamics')
 
-    # Create the list of allowed actions
-    allowed_actions = get_allowed_actions(tx_mat_sparse)
-    logging.info('Created list of allowed actions')
+    # Create the list of admissible actions
+    admissible_actions = get_admissible_actions(tx_mat_sparse)
+    logging.info('Created list of admissible actions')
 
-    # Map disallowed actions
-    tx_mat = map_disallowed_actions(tx_mat_sparse, method=action_map_method)
-    logging.info('Mapped disallowed actions')
+    # Map inadmissible actions
+    tx_mat = map_inadmissible_actions(tx_mat_sparse, method=action_map_method)
+    logging.info('Mapped inadmissible actions')
 
     # Save the dynamics
     params = MDPParameters.create(
         tx_mat, r_mat, d_0,
-        data_policy, allowed_actions,
+        expert_policy, admissible_actions,
         cluster_centers, sofa_scores, metadata)
 
     params.save(out_dir, save_npz=save_npz, save_csv=save_csv)
