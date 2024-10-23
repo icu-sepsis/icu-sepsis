@@ -176,6 +176,10 @@ However, in version 2, the environment creation can take an optional argument
 3. `'raise_exception'`: The environment raises an exception if an inadmissible
    action is taken in any state.
 
+## Experiments
+
+The code for running the experiments shown in the paper can be viewed at [this repository](https://github.com/Dhawgupta/choudhary2024icu).
+
 ## Reproducing the environment parameters
 
 The optional helper library can be installed locally by cloning the repository,
